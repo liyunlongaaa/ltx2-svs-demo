@@ -27,12 +27,12 @@ SELECTION = {
     ],
     ("zh", "10s"): [
         "dualar_s0_dmd_step000600_b9_seed42 copy 2.mp4",
-        "dualar_s0_dmd_step000600_b9_seed42.mp4",
+        "dualar_s0_dmd_step000600_b9_seed42 copy.mp4",
         "dualar_s0_dmd_step000600_b8_seed42.mp4",
     ],
     ("zh", "60s"): [
         "dualar_s0_dmd_step000600_b60_seed42.mp4",
-        "dualar_s0_dmd_step000600_b62_seed42.mp4",
+        "dualar_s0_dmd_step000600_b60_seed42 copy.mp4",
         "dualar_s0_dmd_step000600_b65_seed42.mp4",
     ],
     ("en", "5s"): [
