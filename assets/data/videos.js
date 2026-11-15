@@ -35,10 +35,10 @@ window.DEMO_VIDEOS = [
     "lang": "zh",
     "langLabel": "Mandarin",
     "group": "10s",
-    "duration": 8.04,
+    "duration": 9.04,
     "video": "assets/videos/zh-10s-01.mp4",
     "poster": "assets/posters/zh-10s-01.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b8_seed42.mp4"
+    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42 copy 2.mp4"
   },
   {
     "id": "zh-10s-02",
@@ -55,10 +55,10 @@ window.DEMO_VIDEOS = [
     "lang": "zh",
     "langLabel": "Mandarin",
     "group": "10s",
-    "duration": 9.04,
+    "duration": 8.04,
     "video": "assets/videos/zh-10s-03.mp4",
     "poster": "assets/posters/zh-10s-03.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42 copy 2.mp4"
+    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b8_seed42.mp4"
   },
   {
     "id": "zh-60s-01",

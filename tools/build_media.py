@@ -26,9 +26,9 @@ SELECTION = {
         "dualar_s0_dmd_step000600_b5_seed42.mp4",
     ],
     ("zh", "10s"): [
-        "dualar_s0_dmd_step000600_b8_seed42.mp4",
-        "dualar_s0_dmd_step000600_b9_seed42.mp4",
         "dualar_s0_dmd_step000600_b9_seed42 copy 2.mp4",
+        "dualar_s0_dmd_step000600_b9_seed42.mp4",
+        "dualar_s0_dmd_step000600_b8_seed42.mp4",
     ],
     ("zh", "60s"): [
         "dualar_s0_dmd_step000600_b60_seed42.mp4",
