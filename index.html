@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LTX2.5-SVS — Joint Singing-Voice and Video Generation</title>
+<meta name="description" content="LTX2.5-SVS jointly generates singing voice and video from text and music conditions, streaming at 0.89 s time-to-first-chunk on a single A800.">
+<meta property="og:title" content="LTX2.5-SVS — Joint Singing-Voice and Video Generation">
+<meta property="og:description" content="The first model that jointly generates singing voice and video from text and music conditions, with block-causal streaming inference.">
+<meta property="og:image" content="assets/posters/en-5s-01.jpg">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --surface-0: #ffffff;
+    --surface-1: #fbfbfa;
+    --surface-2: #f3f3f1;
+    --rule: #e4e4e1;
+    --rule-strong: #cfcfca;
+    --text-primary: #121211;
+    --text-secondary: #4c4b47;
+    --text-muted: #77766f;
+    --accent: #2a78d6;
+    --accent-strong: #1c5cab;
+    --accent-soft: #e8f1fd;
+    --good: #1baf7a;
+    --warn: #c98500;
+    --shadow-sm: 0 1px 2px rgb(18 18 17 / .05), 0 1px 3px rgb(18 18 17 / .04);
+    --shadow-md: 0 4px 16px rgb(18 18 17 / .07), 0 1px 3px rgb(18 18 17 / .05);
+    --radius: 12px;
+    --max: 1180px;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-0: #131312;
+      --surface-1: #1a1a19;
+      --surface-2: #232322;
+      --rule: #2e2e2c;
+      --rule-strong: #42423e;
+      --text-primary: #fbfbfa;
+      --text-secondary: #c3c2b7;
+      --text-muted: #918f87;
+      --accent: #3987e5;
+      --accent-strong: #86b6ef;
+      --accent-soft: #17263b;
+      --good: #199e70;
+      --warn: #c98500;
+      --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
+      --shadow-md: 0 4px 16px rgb(0 0 0 / .5);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body {
+    margin: 0; background: var(--surface-0); color: var(--text-primary);
+    font-family: var(--sans); font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  img { max-width: 100%; display: block; }
+  h1, h2, h3 { line-height: 1.2; letter-spacing: -0.02em; margin: 0; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--surface-0) 86%, transparent);
+    backdrop-filter: saturate(1.6) blur(12px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 20px; height: 56px; }
+  .nav-brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; color: var(--text-primary); }
+  .nav-brand span { color: var(--accent); }
+  .nav-links { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  .nav-links a {
+    color: var(--text-secondary); font-size: 14px; font-weight: 500;
+    padding: 6px 11px; border-radius: 8px; text-decoration: none;
+  }
+  .nav-links a:hover { background: var(--surface-2); color: var(--text-primary); }
+  @media (max-width: 720px) { .nav-links a { padding: 6px 8px; font-size: 13px; } .nav-brand { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 68px 0 24px; text-align: center; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--accent-strong); background: var(--accent-soft);
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 4.6vw, 3.4rem); font-weight: 700;
+    max-width: 1000px; margin: 0 auto 16px;
+  }
+  .hero .sub {
+    font-size: clamp(1rem, 1.7vw, 1.2rem); color: var(--text-secondary);
+    max-width: 780px; margin: 0 auto 26px; line-height: 1.55;
+  }
+  .hero .sub em { font-style: italic; }
+  .authors { color: var(--text-secondary); font-size: 15px; margin-bottom: 6px; }
+  .affil { color: var(--text-muted); font-size: 13.5px; margin-bottom: 30px; }
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px; font-size: 14.5px; font-weight: 600;
+    border: 1px solid var(--rule-strong); background: var(--surface-0); color: var(--text-primary);
+    box-shadow: var(--shadow-sm); transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn.primary { background: var(--text-primary); color: var(--surface-0); border-color: transparent; }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* ---------- stat tiles ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 44px 0 8px; }
+  @media (max-width: 720px) { .kpis { grid-template-columns: 1fr; } }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 20px 22px; text-align: left;
+  }
+  .kpi-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+  .kpi-value { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; }
+  .kpi-value small { font-size: 17px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0; margin-left: 3px; }
+  .kpi-note { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+  .kpi-note .vs { color: var(--text-secondary); font-weight: 500; }
+
+  /* ---------- sections ---------- */
+  section { padding: 58px 0; }
+  section + section { border-top: 1px solid var(--rule); }
+  .section-head { margin-bottom: 26px; max-width: 820px; }
+  .section-head h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 700; margin-bottom: 8px; }
+  .section-head p { margin: 0; color: var(--text-secondary); font-size: 15.5px; }
+  .abstract { font-size: 16.5px; line-height: 1.75; color: var(--text-secondary); max-width: 900px; }
+  .abstract strong { color: var(--text-primary); font-weight: 600; }
+  .contrib { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
+  @media (max-width: 900px) { .contrib { grid-template-columns: 1fr; } }
+  .contrib article { background: var(--surface-1); border: 1px solid var(--rule); border-radius: var(--radius); padding: 20px; }
+  .contrib h3 { font-size: 15px; font-weight: 650; margin-bottom: 6px; }
+  .contrib p { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .contrib .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 7px; margin-bottom: 12px;
+    background: var(--accent-soft); color: var(--accent-strong);
+    font-size: 12.5px; font-weight: 700; font-family: var(--mono);
+  }
+
+  /* ---------- figures ---------- */
+  figure { margin: 0; }
+  .fig-frame {
+    background: var(--surface-1); border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 14px; overflow: hidden;
+  }
+  .fig-frame img { width: 100%; border-radius: 6px; }
+  figcaption { font-size: 13.5px; color: var(--text-muted); margin-top: 12px; line-height: 1.55; max-width: 920px; }
+  figcaption b { color: var(--text-secondary); font-weight: 600; }
+  .two-figs { display: grid; grid-template-columns: 1fr; gap: 26px; }
+
+  /* ---------- stages ---------- */
+  .stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 28px; }
+  @media (max-width: 900px) { .stages { grid-template-columns: 1fr; } }
+  .stage { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface-1); padding: 22px; }
+  .stage-tag {
+    font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: .02em;
+    color: var(--accent-strong); background: var(--accent-soft); border-radius: 6px;
+    padding: 3px 8px; display: inline-block; margin-bottom: 12px;
+  }
+  .stage h3 { font-size: 16px; font-weight: 650; margin-bottom: 8px; letter-spacing: -0.01em; }
+  .stage p { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+
+  /* ---------- video gallery ---------- */
+  .filters {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 18px;
+    margin-bottom: 30px; padding: 14px 16px;
+    background: var(--surface-1); border: 1px solid var(--rule); border-radius: var(--radius);
+  }
+  .filter-group { display: flex; align-items: center; gap: 6px; }
+  .filter-label { font-size: 12.5px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
+  .chip {
+    appearance: none; border: 1px solid transparent; background: transparent; color: var(--text-secondary);
+    font: inherit; font-size: 13.5px; font-weight: 500; padding: 5px 12px; border-radius: 999px;
+    cursor: pointer; transition: background .12s ease, color .12s ease;
+  }
+  .chip:hover { background: var(--surface-2); color: var(--text-primary); }
+  .chip[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-0); }
+  .count { margin-left: auto; font-size: 13px; color: var(--text-muted); }
+  .video-group { margin-bottom: 46px; }
+  .video-group-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .video-group-head h3 { font-size: 17px; font-weight: 650; }
+  .video-group-head span { font-size: 13.5px; color: var(--text-muted); }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  @media (max-width: 560px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+  .card {
+    position: relative; border-radius: var(--radius); overflow: hidden;
+    background: var(--surface-2); border: 1px solid var(--rule);
+    aspect-ratio: 1 / 1; cursor: pointer;
+    box-shadow: var(--shadow-sm); transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .card video, .card img.poster {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  }
+  .card img.poster { transition: opacity .25s ease; }
+  .card video { opacity: 0; transition: opacity .25s ease; }
+  .card.is-playing img.poster { opacity: 0; }
+  .card.is-playing video { opacity: 1; }
+  .card-meta {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 12px 9px;
+    color: #fff; font-size: 12px; font-weight: 600;
+    background: linear-gradient(to top, rgb(0 0 0 / .62), transparent);
+    display: flex; align-items: center; justify-content: space-between;
+    pointer-events: none;
+  }
+  .card-meta .lang { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .92; }
+  .card-meta .dur { font-family: var(--mono); font-weight: 500; font-size: 11.5px; }
+  .play-badge {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgb(0 0 0 / .45); backdrop-filter: blur(2px);
+    border: 1px solid rgb(255 255 255 / .55);
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .play-badge svg { width: 17px; height: 17px; fill: #fff; margin-left: 2px; }
+  .card.is-playing .play-badge { opacity: 0; }
+  .card:hover .play-badge { transform: translate(-50%, -50%) scale(1.06); }
+  .empty { color: var(--text-muted); font-size: 14px; padding: 40px 0; text-align: center; }
+
+  /* ---------- tables ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface-1); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em;
+    color: var(--text-muted); text-align: right; padding: 13px 14px; white-space: nowrap;
+    border-bottom: 1px solid var(--rule-strong); background: var(--surface-2);
+  }
+  thead tr:first-child th { text-transform: none; letter-spacing: 0; font-size: 12.5px; color: var(--text-secondary); }
+  thead th:first-child, tbody td:first-child { text-align: left; position: sticky; left: 0; }
+  tbody td { padding: 10px 14px; text-align: right; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody td:first-child { font-weight: 500; background: var(--surface-1); }
+  tbody tr.ours td { background: var(--accent-soft); font-weight: 650; color: var(--text-primary); }
+  tbody tr.ours td:first-child { background: var(--accent-soft); }
+  thead th.ours-col { color: var(--accent-strong); }
+  .best { font-weight: 700; }
+  .table-note { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+  .table-title { font-size: 14.5px; font-weight: 650; margin: 32px 0 10px; }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--rule); padding: 34px 0 46px; color: var(--text-muted); font-size: 13.5px; }
+  .footer-inner { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .footer-inner a { color: var(--text-secondary); }
+  .bibtex {
+    margin-top: 18px; background: var(--surface-1); border: 1px solid var(--rule); border-radius: 10px;
+    padding: 14px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.65;
+    color: var(--text-secondary); white-space: pre-wrap; overflow-x: auto;
+  }
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 16px; top: 12px; background: var(--surface-0); padding: 8px 12px; border-radius: 8px; z-index: 100; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#abstract">Skip to content</a>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <div class="nav-brand">LTX2.5<span>-SVS</span></div>
+    <div class="nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#method">Method</a>
+      <a href="#samples">Samples</a>
+      <a href="#results">Results</a>
+      <a href="https://github.com/liyunlongaaa" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Technical Report · 2026</div>
+    <h1>LTX2.5-SVS: Joint Singing-Voice and Video Generation from Text and Music Conditions via Three-Stage Distillation</h1>
+    <p class="sub">
+      To our knowledge, the first model that generates the singing voice and the moving image
+      <em>jointly</em> from text and music — rolling out minute-level audio-video from 5-second
+      training clips, with streaming inference.
+    </p>
+    <div class="authors">Anonymous Authors</div>
+    <div class="affil">Paper under review · authors and affiliations withheld</div>
+    <div class="btn-row">
+      <a class="btn primary" href="#samples">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        Watch samples
+      </a>
+      <a class="btn" href="assets/ltx2-svs-source.zip" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Paper (LaTeX source)
+      </a>
+      <a class="btn" href="https://github.com/liyunlongaaa/ltx2-svs-demo" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.2.8-.5v-2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.4 3.6 1.1.1-.8.4-1.4.8-1.7-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5A11.5 11.5 0 0 0 12 .5z"/></svg>
+        Code &amp; page
+      </a>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">Time to first chunk</div>
+        <div class="kpi-value">0.89<small>s</small></div>
+        <div class="kpi-note"><span class="vs">vs 105 s</span> · 118× sooner than the dense baseline</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Streaming throughput</div>
+        <div class="kpi-value">22.7<small>FPS</small></div>
+        <div class="kpi-note"><span class="vs">vs 1.96 FPS</span> · 11.6× faster, single A800</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Training horizon → rollout</div>
+        <div class="kpi-value">5<small>s</small> → 60<small>s+</small></div>
+        <div class="kpi-note">Minute-level audio-video from 5 s clips</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="abstract">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Abstract</h2>
+      </div>
+      <p class="abstract">
+        We present <strong>LTX2.5-SVS</strong>, to our knowledge the first model that jointly generates singing voice and video
+        from text and music conditions. Our system is built from a bidirectional 22B audio-video diffusion foundation through a
+        three-stage pipeline: (1) singing-voice synthesis (SVS) capability training on the bidirectional foundation, injecting
+        lyric, melody, and singer-timbre conditioning through full cross-modal attention adaptation; (2) block-causal adaptation,
+        which converts the bidirectional model into a dual-stream, block-causal generator trained by teacher forcing with
+        closed-loop error recycling; and (3) distribution-matching distillation (DMD) with self-forcing that compresses the
+        block-causal generator to few denoising steps per block while preserving singing-driven lip sync. Trained on short
+        (≈5&nbsp;s) clips, the block-causal generator produces minute-level audio-video in a single autoregressive rollout.
+      </p>
+      <div class="contrib">
+        <article>
+          <div class="num">1</div>
+          <h3>Joint singing + video</h3>
+          <p>The first system to generate the singing voice and the moving image together from text and music, with block-causal inference at few denoising steps per block.</p>
+        </article>
+        <article>
+          <div class="num">2</div>
+          <h3>Dual-stream error recycling</h3>
+          <p>Per-modality error buffers and injection paths equip the 22B bidirectional model with autoregressive capability — paired-stream recycling on top of on-policy teacher forcing.</p>
+        </article>
+        <article>
+          <div class="num">3</div>
+          <h3>Streaming at 22.7 FPS</h3>
+          <p>0.89 s time-to-first-chunk and 22.7 FPS on a single NVIDIA A800 — an 11.6× throughput advantage over the dense baseline, with competitive singing quality.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Method</h2>
+        <p>Each stage starts from the checkpoint exported by the previous one, and each needs a different data recipe.</p>
+      </div>
+      <figure>
+        <div class="fig-frame">
+          <img src="assets/figures/pipeline.png" width="2880" height="1620"
+               alt="Diagram of the three-stage pipeline: Stage 1 singing ability, Stage 2 streaming generation with dual-stream error recycling, Stage 3 few-step distillation.">
+        </div>
+        <figcaption>
+          <b>Progressive streaming adaptation and distillation.</b> Stage 1 instills singing ability on the bidirectional
+          foundation; Stage 2 turns generation block-causal and streaming with dual-stream error recycling; Stage 3
+          distills to few denoising steps per block.
+        </figcaption>
+      </figure>
+      <div class="stages">
+        <div class="stage">
+          <div class="stage-tag">STAGE 1</div>
+          <h3>Singing ability</h3>
+          <p>On the bidirectional 22B audio-video foundation, LoRA adapts only the audio stream. Frozen SVS conditions encode lyrics, note types, and F0; a reference clip carries singer timbre. Trained on ~3,000 hours of Chinese and English songs.</p>
+        </div>
+        <div class="stage">
+          <div class="stage-tag">STAGE 2</div>
+          <h3>Block-causal streaming</h3>
+          <p>One teacher-forcing objective converts the model into a block-causal generator — no rollout, no ODE synthesis. The model's own prediction errors are replayed into its inputs through per-stream video and audio error banks.</p>
+        </div>
+        <div class="stage">
+          <div class="stage-tag">STAGE 3</div>
+          <h3>Few-step distillation</h3>
+          <p>Distribution-matching distillation with self-forcing compresses generation to four denoising steps per block, training the student on its own rollout distribution while keeping singing-driven lip sync intact.</p>
+        </div>
+      </div>
+
+      <figure style="margin-top: 34px;">
+        <div class="fig-frame">
+          <img src="assets/figures/error_recycling.png" width="2160" height="1305" loading="lazy"
+               alt="Comparison of training paradigms: the Forcing series, SVI/LongLive, Omni Forcing, and the dual-stream recycling used in this work.">
+        </div>
+        <figcaption>
+          <b>Training paradigms for autoregressive audio-video generation.</b> The video-only Forcing series regresses on
+          synthesized ODE trajectories; SVI / LongLive recycle prediction errors over long-horizon video rollout; Omni
+          Forcing applies the ODE-trajectory recipe to audio and video; our pipeline recycles prediction errors on video and
+          audio jointly, using raw audio-video pairs directly and requiring no ODE synthesis.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="samples">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Samples</h2>
+        <p>Every clip below is a single autoregressive rollout. Clips are grouped by the length of the audio-video being generated: short phrases, ~10 s passages, and minute-level performances. Click a tile to play with sound.</p>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group" role="group" aria-label="Filter by language">
+          <span class="filter-label">Language</span>
+          <button class="chip" data-filter="lang" data-value="all" aria-pressed="true">All</button>
+          <button class="chip" data-filter="lang" data-value="zh" aria-pressed="false">中文</button>
+          <button class="chip" data-filter="lang" data-value="en" aria-pressed="false">English</button>
+        </div>
+        <div class="filter-group" role="group" aria-label="Filter by clip length">
+          <span class="filter-label">Length</span>
+          <button class="chip" data-filter="group" data-value="all" aria-pressed="true">All</button>
+          <button class="chip" data-filter="group" data-value="5s" aria-pressed="false">5 s</button>
+          <button class="chip" data-filter="group" data-value="10s" aria-pressed="false">10 s</button>
+          <button class="chip" data-filter="group" data-value="60s" aria-pressed="false">60 s</button>
+        </div>
+        <div class="count" id="visible-count"></div>
+      </div>
+
+      <div id="gallery"></div>
+      <p class="empty" id="empty-state" hidden>No clips match this filter combination.</p>
+    </div>
+  </section>
+
+  <section id="results">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Results</h2>
+        <p>The singing module is scored against dedicated SVS systems on GMO-SVS; the joint generator is scored against two releases of the LTX-2.5 inference stack.</p>
+      </div>
+
+      <h3 class="table-title">Singing performance · GMO-SVS test set (802 samples)</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2">System</th>
+              <th colspan="4">Chinese</th>
+              <th colspan="4">English</th>
+            </tr>
+            <tr>
+              <th>WER ↓</th><th>SIM ↑</th><th>FFE ↓</th><th>SingMOS ↑</th>
+              <th>WER ↓</th><th>SIM ↑</th><th>FFE ↓</th><th>SingMOS ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Ground Truth</td><td>0.074</td><td>n/a</td><td>n/a</td><td>4.624</td><td>0.197</td><td>n/a</td><td>n/a</td><td>4.441</td></tr>
+            <tr><td>StyleSinger</td><td>0.367</td><td>0.817</td><td>0.363</td><td>3.938</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+            <tr><td>TCSinger</td><td>0.270</td><td>0.855</td><td>0.315</td><td>3.977</td><td>0.410</td><td>0.879</td><td>0.211</td><td>3.662</td></tr>
+            <tr><td>YingMusic-Singer</td><td>0.099</td><td class="best">0.902</td><td>0.132</td><td>4.145</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+            <tr><td>Vevosing</td><td>0.233</td><td>0.899</td><td>0.112</td><td>4.355</td><td>0.239</td><td class="best">0.922</td><td>0.088</td><td class="best">4.321</td></tr>
+            <tr><td>SoulX-Singer</td><td class="best">0.065</td><td>0.898</td><td class="best">0.046</td><td class="best">4.453</td><td class="best">0.174</td><td>0.917</td><td class="best">0.037</td><td>4.300</td></tr>
+            <tr class="ours"><td>Ours</td><td>0.120</td><td>0.864</td><td>0.092</td><td>4.362</td><td>0.283</td><td>0.901</td><td>0.073</td><td>4.164</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Bold marks the best value per metric among compared systems (Ground Truth is the reference audio). SIM and FFE are unavailable for the English split of StyleSinger and YingMusic-Singer.</p>
+
+      <h3 class="table-title">Audio-visual generation · shared internal prompt set</h3>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th rowspan="2">System</th>
+              <th colspan="6">VBench</th>
+              <th colspan="4">VideoAlign</th>
+              <th>SyncNet</th>
+              <th colspan="2">Efficiency</th>
+            </tr>
+            <tr>
+              <th>Subject ↑</th><th>Background ↑</th><th>Motion ↑</th><th>Dynamic ↑</th><th>Aesthetic ↑</th><th>Imaging ↑</th>
+              <th>VQ ↑</th><th>MQ ↑</th><th>TA ↑</th><th>Overall ↑</th>
+              <th>LSE-C ↑</th>
+              <th>TTFC</th><th>FPS ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Audio-driven baseline</td><td>0.927</td><td>0.942</td><td>0.993</td><td>0.690</td>
+              <td class="best">0.592</td><td>61.54</td>
+              <td>−0.375</td><td>−0.256</td><td class="best">1.247</td><td>0.616</td>
+              <td class="best">5.85</td><td>n/a</td><td>n/a</td>
+            </tr>
+            <tr>
+              <td>Text-to-AV baseline</td><td class="best">0.932</td><td class="best">0.947</td><td class="best">0.994</td><td>0.640</td>
+              <td>0.579</td><td>58.49</td>
+              <td>−0.504</td><td>−0.269</td><td>1.150</td><td>0.377</td>
+              <td>1.12</td><td>105 s</td><td>1.96</td>
+            </tr>
+            <tr class="ours">
+              <td>Ours</td><td>0.898</td><td>0.923</td><td>0.993</td><td class="best">0.900</td>
+              <td>0.545</td><td class="best">65.65</td>
+              <td class="best">0.235</td><td class="best">0.047</td><td>0.361</td><td class="best">0.643</td>
+              <td>5.75</td><td class="best">0.89 s</td><td class="best">22.70</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">VBench: subject, background, motion, dynamic, aesthetic, imaging. VideoAlign: visual quality, motion quality, text alignment, overall. LSE-C is SyncNet lip-sync confidence. TTFC and FPS measured on 10-second songs at 512×512 on a single NVIDIA A800. Best values in bold.</p>
+    </div>
+  </section>
+
+  <section id="limitations">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Limitations</h2>
+        <p>Reported honestly in the paper — the model is a research prototype, not a production singing system.</p>
+      </div>
+      <div class="contrib">
+        <article>
+          <h3>Long-horizon stability</h3>
+          <p>Minute-long rollouts stay largely stable, but backgrounds and objects drift over time, and the sung voice can gradually drift from the input lyrics.</p>
+        </article>
+        <article>
+          <h3>Prompt dependence</h3>
+          <p>Training covers too few scenes and styles. Prompts near the training distribution work well; out-of-distribution prompts degrade, and text alignment trails the baselines.</p>
+        </article>
+        <article>
+          <h3>Gap to SVS specialists</h3>
+          <p>On GMO-SVS the singing module trails the strongest dedicated system by a modest margin. Timbre specification was not a focus of the few-step distilled model.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>© 2026 LTX2.5-SVS · Demo page. Videos generated by the model; all performers are synthetic.</div>
+      <div><a href="https://github.com/liyunlongaaa" target="_blank" rel="noopener">github.com/liyunlongaaa</a></div>
+    </div>
+    <details style="margin-top: 18px;">
+      <summary style="cursor: pointer; color: var(--text-secondary); font-size: 13.5px;">Cite</summary>
+      <div class="bibtex">@article{ltx25svs2026,
+  title   = {LTX2.5-SVS: Joint Singing-Voice and Video Generation from
+             Text and Music Conditions via Three-Stage Distillation},
+  author  = {Anonymous},
+  year    = {2026},
+  note    = {Technical report, draft v0.1}
+}</div>
+    </details>
+  </div>
+</footer>
+
+<script src="assets/data/videos.js"></script>
+<script>
+(function () {
+  var entries = window.DEMO_VIDEOS || [];
+  var gallery = document.getElementById('gallery');
+  var emptyState = document.getElementById('empty-state');
+  var countEl = document.getElementById('visible-count');
+  var state = { lang: 'all', group: 'all' };
+  var groups = [
+    ['5s',  'Short phrases', 'a few seconds'],
+    ['10s', 'Verses', 'about ten seconds'],
+    ['60s', 'Full performances', 'a minute and beyond']
+  ];
+
+  function fmtDuration(s) {
+    var total = Math.round(s);
+    var m = Math.floor(total / 60);
+    var r = total % 60;
+    return m > 0 ? m + ':' + String(r).padStart(2, '0') : total + ' s';
+  }
+
+  function matches(e) {
+    return (state.lang === 'all' || e.lang === state.lang) &&
+           (state.group === 'all' || e.group === state.group);
+  }
+
+  function card(e) {
+    var el = document.createElement('div');
+    el.className = 'card';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Play ' + e.langLabel + ' sample, ' + fmtDuration(e.duration));
+    el.innerHTML =
+      '<img class="poster" loading="lazy" width="512" height="512" src="' + e.poster + '" alt="">' +
+      '<video preload="none" playsinline webkit-playsinline loop>' +
+        '<source src="' + e.video + '" type="video/mp4">' +
+      '</video>' +
+      '<div class="play-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>' +
+      '<div class="card-meta">' +
+        '<span class="lang">' + e.langLabel + '</span>' +
+        '<span class="dur">' + fmtDuration(e.duration) + '</span>' +
+      '</div>';
+
+    var video = el.querySelector('video');
+    // Only one clip plays at a time; audio is part of the result being shown.
+    function play() {
+      document.querySelectorAll('.card.is-playing').forEach(function (other) {
+        if (other !== el) { other.querySelector('video').pause(); other.classList.remove('is-playing'); }
+      });
+      if (!video.paused) { video.pause(); el.classList.remove('is-playing'); return; }
+      video.play().then(function () {
+        el.classList.add('is-playing');
+      }).catch(function () {
+        // Autoplay policy blocked sound: fall back to a muted preview.
+        video.muted = true;
+        video.play().then(function () { el.classList.add('is-playing'); }).catch(function () {});
+      });
+    }
+    el.addEventListener('click', play);
+    el.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); play(); }
+    });
+    video.addEventListener('ended', function () { el.classList.remove('is-playing'); });
+    return el;
+  }
+
+  function render() {
+    gallery.innerHTML = '';
+    var visible = 0;
+    groups.forEach(function (g) {
+      if (state.group !== 'all' && state.group !== g[0]) return;
+      var items = entries.filter(function (e) { return e.group === g[0] && matches(e); });
+      if (!items.length) return;
+      visible += items.length;
+      var section = document.createElement('div');
+      section.className = 'video-group';
+      var head = document.createElement('div');
+      head.className = 'video-group-head';
+      head.innerHTML = '<h3>' + g[1] + '</h3><span>' + items.length + ' clip' +
+        (items.length === 1 ? '' : 's') + ' · ' + g[2] + '</span>';
+      var grid = document.createElement('div');
+      grid.className = 'grid';
+      items.forEach(function (e) { grid.appendChild(card(e)); });
+      section.appendChild(head);
+      section.appendChild(grid);
+      gallery.appendChild(section);
+    });
+    countEl.textContent = visible + ' of ' + entries.length + ' clips';
+    emptyState.hidden = visible !== 0;
+  }
+
+  document.querySelectorAll('.chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var key = chip.dataset.filter;
+      state[key] = chip.dataset.value;
+      document.querySelectorAll('.chip[data-filter="' + key + '"]').forEach(function (c) {
+        c.setAttribute('aria-pressed', String(c === chip));
+      });
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
