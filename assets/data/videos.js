@@ -18,67 +18,17 @@ window.DEMO_VIDEOS = [
     "duration": 4.04,
     "video": "assets/videos/zh-5s-02.mp4",
     "poster": "assets/posters/zh-5s-02.jpg",
-    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b4_seed42 copy.mp4"
+    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b4_seed42.mp4"
   },
   {
     "id": "zh-5s-03",
     "lang": "zh",
     "langLabel": "Mandarin",
     "group": "5s",
-    "duration": 4.04,
+    "duration": 5.04,
     "video": "assets/videos/zh-5s-03.mp4",
     "poster": "assets/posters/zh-5s-03.jpg",
-    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b4_seed42.mp4"
-  },
-  {
-    "id": "zh-5s-04",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "5s",
-    "duration": 5.04,
-    "video": "assets/videos/zh-5s-04.mp4",
-    "poster": "assets/posters/zh-5s-04.jpg",
-    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b5_seed42 copy 2.mp4"
-  },
-  {
-    "id": "zh-5s-05",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "5s",
-    "duration": 5.04,
-    "video": "assets/videos/zh-5s-05.mp4",
-    "poster": "assets/posters/zh-5s-05.jpg",
-    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b5_seed42 copy.mp4"
-  },
-  {
-    "id": "zh-5s-06",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "5s",
-    "duration": 5.04,
-    "video": "assets/videos/zh-5s-06.mp4",
-    "poster": "assets/posters/zh-5s-06.jpg",
     "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b5_seed42.mp4"
-  },
-  {
-    "id": "zh-5s-07",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "5s",
-    "duration": 6.04,
-    "video": "assets/videos/zh-5s-07.mp4",
-    "poster": "assets/posters/zh-5s-07.jpg",
-    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b6_seed42 copy.mp4"
-  },
-  {
-    "id": "zh-5s-08",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "5s",
-    "duration": 6.04,
-    "video": "assets/videos/zh-5s-08.mp4",
-    "poster": "assets/posters/zh-5s-08.jpg",
-    "source": "../videos/zh/5s/dualar_s0_dmd_step000600_b6_seed42.mp4"
   },
   {
     "id": "zh-10s-01",
@@ -88,17 +38,17 @@ window.DEMO_VIDEOS = [
     "duration": 8.04,
     "video": "assets/videos/zh-10s-01.mp4",
     "poster": "assets/posters/zh-10s-01.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b8_seed42 copy.mp4"
+    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b8_seed42.mp4"
   },
   {
     "id": "zh-10s-02",
     "lang": "zh",
     "langLabel": "Mandarin",
     "group": "10s",
-    "duration": 8.04,
+    "duration": 9.04,
     "video": "assets/videos/zh-10s-02.mp4",
     "poster": "assets/posters/zh-10s-02.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b8_seed42.mp4"
+    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42.mp4"
   },
   {
     "id": "zh-10s-03",
@@ -111,46 +61,6 @@ window.DEMO_VIDEOS = [
     "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42 copy 2.mp4"
   },
   {
-    "id": "zh-10s-04",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "10s",
-    "duration": 9.04,
-    "video": "assets/videos/zh-10s-04.mp4",
-    "poster": "assets/posters/zh-10s-04.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42 copy 3.mp4"
-  },
-  {
-    "id": "zh-10s-05",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "10s",
-    "duration": 9.04,
-    "video": "assets/videos/zh-10s-05.mp4",
-    "poster": "assets/posters/zh-10s-05.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42 copy 4.mp4"
-  },
-  {
-    "id": "zh-10s-06",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "10s",
-    "duration": 9.04,
-    "video": "assets/videos/zh-10s-06.mp4",
-    "poster": "assets/posters/zh-10s-06.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42 copy.mp4"
-  },
-  {
-    "id": "zh-10s-07",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "10s",
-    "duration": 9.04,
-    "video": "assets/videos/zh-10s-07.mp4",
-    "poster": "assets/posters/zh-10s-07.jpg",
-    "source": "../videos/zh/10s/dualar_s0_dmd_step000600_b9_seed42.mp4"
-  },
-  {
     "id": "zh-60s-01",
     "lang": "zh",
     "langLabel": "Mandarin",
@@ -158,36 +68,26 @@ window.DEMO_VIDEOS = [
     "duration": 60.04,
     "video": "assets/videos/zh-60s-01.mp4",
     "poster": "assets/posters/zh-60s-01.jpg",
-    "source": "../videos/zh/60s/dualar_s0_dmd_step000600_b60_seed42 copy.mp4"
+    "source": "../videos/zh/60s/dualar_s0_dmd_step000600_b60_seed42.mp4"
   },
   {
     "id": "zh-60s-02",
     "lang": "zh",
     "langLabel": "Mandarin",
     "group": "60s",
-    "duration": 60.04,
+    "duration": 62.04,
     "video": "assets/videos/zh-60s-02.mp4",
     "poster": "assets/posters/zh-60s-02.jpg",
-    "source": "../videos/zh/60s/dualar_s0_dmd_step000600_b60_seed42.mp4"
+    "source": "../videos/zh/60s/dualar_s0_dmd_step000600_b62_seed42.mp4"
   },
   {
     "id": "zh-60s-03",
     "lang": "zh",
     "langLabel": "Mandarin",
     "group": "60s",
-    "duration": 62.04,
+    "duration": 65.04,
     "video": "assets/videos/zh-60s-03.mp4",
     "poster": "assets/posters/zh-60s-03.jpg",
-    "source": "../videos/zh/60s/dualar_s0_dmd_step000600_b62_seed42.mp4"
-  },
-  {
-    "id": "zh-60s-04",
-    "lang": "zh",
-    "langLabel": "Mandarin",
-    "group": "60s",
-    "duration": 65.04,
-    "video": "assets/videos/zh-60s-04.mp4",
-    "poster": "assets/posters/zh-60s-04.jpg",
     "source": "../videos/zh/60s/dualar_s0_dmd_step000600_b65_seed42.mp4"
   },
   {
@@ -195,9 +95,29 @@ window.DEMO_VIDEOS = [
     "lang": "en",
     "langLabel": "English",
     "group": "5s",
-    "duration": 8.04,
+    "duration": 5.04,
     "video": "assets/videos/en-5s-01.mp4",
     "poster": "assets/posters/en-5s-01.jpg",
+    "source": "../videos/en/5s/dualar_s0_dmd_step000600_b5_seed42_1.mp4"
+  },
+  {
+    "id": "en-5s-02",
+    "lang": "en",
+    "langLabel": "English",
+    "group": "5s",
+    "duration": 5.04,
+    "video": "assets/videos/en-5s-02.mp4",
+    "poster": "assets/posters/en-5s-02.jpg",
+    "source": "../videos/en/5s/dualar_s0_dmd_step000600_b5_seed42.mp4"
+  },
+  {
+    "id": "en-5s-03",
+    "lang": "en",
+    "langLabel": "English",
+    "group": "5s",
+    "duration": 8.04,
+    "video": "assets/videos/en-5s-03.mp4",
+    "poster": "assets/posters/en-5s-03.jpg",
     "source": "../videos/en/5s/dualar_s0_dmd_step000600_b8_seed42.mp4"
   },
   {
@@ -208,7 +128,7 @@ window.DEMO_VIDEOS = [
     "duration": 8.04,
     "video": "assets/videos/en-10s-01.mp4",
     "poster": "assets/posters/en-10s-01.jpg",
-    "source": "../videos/en/10s/dualar_s0_dmd_step000600_b8_seed42.mp4"
+    "source": "../videos/en/10s/dualar_s0_dmd_step000600_b8_seed42_.mp4"
   },
   {
     "id": "en-10s-02",
@@ -218,7 +138,7 @@ window.DEMO_VIDEOS = [
     "duration": 8.04,
     "video": "assets/videos/en-10s-02.mp4",
     "poster": "assets/posters/en-10s-02.jpg",
-    "source": "../videos/en/10s/dualar_s0_dmd_step000600_b8_seed42_.mp4"
+    "source": "../videos/en/10s/dualar_s0_dmd_step000600_b8_seed42_2.mp4"
   },
   {
     "id": "en-10s-03",
@@ -228,7 +148,7 @@ window.DEMO_VIDEOS = [
     "duration": 8.04,
     "video": "assets/videos/en-10s-03.mp4",
     "poster": "assets/posters/en-10s-03.jpg",
-    "source": "../videos/en/10s/dualar_s0_dmd_step000600_b8_seed42_2.mp4"
+    "source": "../videos/en/10s/dualar_s0_dmd_step000600_b8_seed42.mp4"
   },
   {
     "id": "en-60s-01",
@@ -259,15 +179,5 @@ window.DEMO_VIDEOS = [
     "video": "assets/videos/en-60s-03.mp4",
     "poster": "assets/posters/en-60s-03.jpg",
     "source": "../videos/en/60s/dualar_s0_dmd_step000600_b65_seed42.mp4"
-  },
-  {
-    "id": "en-60s-04",
-    "lang": "en",
-    "langLabel": "English",
-    "group": "60s",
-    "duration": 66.04,
-    "video": "assets/videos/en-60s-04.mp4",
-    "poster": "assets/posters/en-60s-04.jpg",
-    "source": "../videos/en/60s/dualar_s0_dmd_step000600_b66_seed42.mp4"
   }
 ];

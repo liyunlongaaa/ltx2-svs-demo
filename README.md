@@ -23,17 +23,33 @@ site/
 
 ## Editing
 
-**Swap or reorder clips.** Drop new `.mp4` files into `../videos/<lang>/<5s|10s|60s>/`,
-then rebuild:
+**Swap a song.** All clip selection lives in one place: the `SELECTION` dict at the
+top of `tools/build_media.py`. Each `(language, length)` group lists three source
+filenames, relative to `../videos/<lang>/<group>/`, in display order:
 
-```sh
-python3 tools/build_media.py --force
+```python
+SELECTION = {
+    ("zh", "5s"): [
+        "dualar_s0_dmd_step000600_b3_seed42.mp4",
+        "dualar_s0_dmd_step000600_b4_seed42.mp4",
+        "dualar_s0_dmd_step000600_b5_seed42.mp4",
+    ],
+    ...
+}
 ```
 
-The script copies each clip (stream copy, `+faststart` so playback starts before the
-file finishes downloading), extracts a 512×512 poster at ~30% of the clip, and rewrites
-`assets/data/videos.js`. Clips are ordered alphabetically inside each language/length
-group; the path shown on the page is `videos/<lang>/<group>/<n> - <duration>`.
+To change the lineup, edit those lists, then rebuild:
+
+```sh
+python3 tools/build_media.py
+```
+
+The script fails fast if a listed file is missing, copies each clip (stream copy,
+`+faststart` so playback starts before the file finishes downloading), extracts a
+512×512 poster at ~30% of the clip, rewrites `assets/data/videos.js`, and deletes
+web copies that are no longer selected. Output filenames are positional
+(`zh-5s-01`, `zh-5s-02`, …), so reordering the list reorders the cards with no
+further edits. Use `--force` to regenerate clips that already exist.
 
 **Edit text.** Everything is in `index.html`. The galleries are rendered at load time
 from `assets/data/videos.js`; the filters (language × length) are client-side only.

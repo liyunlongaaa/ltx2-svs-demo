@@ -191,6 +191,8 @@
   .video-group-head h3 { font-size: 17px; font-weight: 650; }
   .video-group-head span { font-size: 13.5px; color: var(--text-muted); }
   .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  /* Six clips (3 per language) land as one row of three on wide screens. */
+  @media (min-width: 1000px) { .grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 560px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
   .card {
     position: relative; border-radius: var(--radius); overflow: hidden;
