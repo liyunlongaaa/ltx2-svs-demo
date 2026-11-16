@@ -16,7 +16,6 @@ site/
 │   ├── videos/             # web copies of the demo clips
 │   ├── posters/            # cover frame per clip
 │   ├── figures/            # paper figures rendered to PNG
-│   └── ltx2-svs-source.zip # LaTeX source download
 ├── tools/build_media.py    # regenerates videos.js, videos/, posters/
 └── .nojekyll
 ```
