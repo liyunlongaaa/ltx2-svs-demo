@@ -1,8 +1,7 @@
 # LTX2.5-SVS — Demo page
 
-Static demo site for *LTX2.5-SVS: Joint Singing-Voice and Video Generation from Text and Music
-Conditions via Three-Stage Distillation*. No build step, no framework — plain HTML/CSS/JS,
-served directly by GitHub Pages.
+Static demo site for *LTX2.5-SVS: Toward Streaming Joint Singing and Video Generation*. No build
+step, no framework — plain HTML/CSS/JS, served directly by GitHub Pages.
 
 **Live:** https://liyunlongaaa.github.io/ltx2-svs-demo/
 
