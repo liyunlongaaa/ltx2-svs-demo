@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LTX2.5-SVS — Joint Singing-Voice and Video Generation</title>
-<meta name="description" content="LTX2.5-SVS jointly generates singing voice and video from text and music conditions, streaming at 0.89 s time-to-first-chunk on a single A800.">
-<meta property="og:title" content="LTX2.5-SVS — Joint Singing-Voice and Video Generation">
-<meta property="og:description" content="The first model that jointly generates singing voice and video from text and music conditions, with block-causal streaming inference.">
+<meta name="description" content="LTX2.5-SVS: toward streaming joint singing and video generation — 0.89 s time-to-first-chunk at 22.7 FPS on a single A800.">
+<meta property="og:title" content="LTX2.5-SVS — Toward Streaming Joint Singing and Video Generation">
+<meta property="og:description" content="To our knowledge, the first system that jointly generates singing voice and video, and does so as a streaming generator with block-causal inference.">
 <meta property="og:image" content="assets/posters/en-5s-01.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -286,11 +286,11 @@
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow">Technical Report · 2026</div>
-    <h1>LTX2.5-SVS: Joint Singing-Voice and Video Generation from Text and Singing Conditions</h1>
+    <h1>LTX2.5-SVS: Toward Streaming Joint Singing and Video Generation</h1>
     <p class="sub">
-      To our knowledge, the first model that generates the singing voice and the moving image
-      <em>jointly</em> from text and music — rolling out minute-level audio-video from 5-second
-      training clips, with streaming inference.
+      The first system, to our knowledge, that generates the singing voice and the moving image
+      <em>jointly</em> — and does so as a streaming generator, rolling out
+      minute-level audio-video from 5-second training clips.
     </p>
     <div class="authors">Anonymous Authors</div>
     <div class="affil">Paper under review · authors and affiliations withheld</div>
@@ -332,20 +332,34 @@
         <h2>Abstract</h2>
       </div>
       <p class="abstract">
-        We present <strong>LTX2.5-SVS</strong>, to our knowledge the first model that jointly generates singing voice and video
-        from text and music conditions. Our system is built from a bidirectional 22B audio-video diffusion foundation through a
-        three-stage pipeline: (1) singing-voice synthesis (SVS) capability training on the bidirectional foundation, injecting
-        lyric, melody, and singer-timbre conditioning through full cross-modal attention adaptation; (2) block-causal adaptation,
-        which converts the bidirectional model into a dual-stream, block-causal generator trained by teacher forcing with
-        closed-loop error recycling; and (3) distribution-matching distillation (DMD) with self-forcing that compresses the
+        We present <strong>LTX2.5-SVS</strong>, to our knowledge the first model that jointly generates singing voice and video,
+        and does so as a streaming generator. Our system is built from a bidirectional 22B audio-video diffusion foundation
+        through a three-stage pipeline: (1) singing-voice synthesis (SVS) capability training on the bidirectional foundation,
+        injecting lyric, melody, and singer-timbre conditioning through full cross-modal attention adaptation; (2) block-causal
+        adaptation, which converts the bidirectional model into a dual-stream, block-causal generator trained by teacher forcing
+        with closed-loop error recycling; and (3) distribution-matching distillation (DMD) with self-forcing that compresses the
         block-causal generator to few denoising steps per block while preserving singing-driven lip sync. Trained on short
-        (≈5&nbsp;s) clips, the block-causal generator produces minute-level audio-video in a single autoregressive rollout.
+        (≈5&nbsp;s) clips, the block-causal generator produces minute-level audio-video, several times its training horizon, in a
+        single autoregressive rollout.
+      </p>
+      <p class="abstract">
+        We evaluate the generated singing voice and video separately. On the GMO-SVS test set, our singing module approaches
+        specialist-level performance. For audio-video generation, we compare against the released LTX-2.5 inference stacks our
+        system starts from: an audio-driven pipeline that receives the singing track as input, and a Text-to-AV pipeline with no
+        singing signal. Our model attains visual and motion quality superior to both baselines, and its lip-sync confidence
+        approaches the audio-driven baseline. The Text-to-AV baseline scores higher on text alignment, and because that dimension
+        dominates the aggregate VideoAlign score it ranks above ours there — a consequence of our model specializing in close-up
+        singing portraits rather than the wider scenes the prompt describes.
+      </p>
+      <p class="abstract">
+        Inference is measurably streaming on a single NVIDIA A800 80&nbsp;GB: the first ≈1&nbsp;s chunk completes in 0.89&nbsp;s
+        (the dense baseline produces no output until fully denoised, 105&nbsp;s), at 22.7&nbsp;FPS — an 11.6× throughput advantage.
       </p>
       <div class="contrib">
         <article>
           <div class="num">1</div>
           <h3>Joint singing + video</h3>
-          <p>The first system to generate the singing voice and the moving image together from text and music, with block-causal inference at few denoising steps per block.</p>
+          <p>To our knowledge, the first system to generate the singing voice and the moving image together, with streaming block-causal inference at few denoising steps per block.</p>
         </article>
         <article>
           <div class="num">2</div>
@@ -496,25 +510,26 @@
             <tr>
               <td>Audio-driven baseline</td><td>0.927</td><td>0.942</td><td>0.993</td><td>0.690</td>
               <td class="best">0.592</td><td>61.54</td>
-              <td>−0.375</td><td>−0.256</td><td class="best">1.247</td><td>0.616</td>
-              <td class="best">5.85</td><td>n/a</td><td>n/a</td>
+              <td>−0.375</td><td>−0.256</td><td>1.247</td><td>0.616</td>
+              <td class="best">5.85</td><td>—</td><td>—</td>
             </tr>
             <tr>
-              <td>Text-to-AV baseline</td><td class="best">0.932</td><td class="best">0.947</td><td class="best">0.994</td><td>0.640</td>
-              <td>0.579</td><td>58.49</td>
-              <td>−0.504</td><td>−0.269</td><td>1.150</td><td>0.377</td>
-              <td>1.12</td><td>105 s</td><td>1.96</td>
+              <td>Text-to-AV baseline</td><td class="best">0.957</td><td class="best">0.956</td><td class="best">0.994</td><td>0.644</td>
+              <td>0.586</td><td>65.55</td>
+              <td>0.027</td><td>−0.127</td><td class="best">1.423</td><td class="best">1.323</td>
+              <td>2.91</td><td>105 s</td><td>1.96</td>
             </tr>
             <tr class="ours">
               <td>Ours</td><td>0.898</td><td>0.923</td><td>0.993</td><td class="best">0.900</td>
               <td>0.545</td><td class="best">65.65</td>
-              <td class="best">0.235</td><td class="best">0.047</td><td>0.361</td><td class="best">0.643</td>
+              <td class="best">0.235</td><td class="best">0.047</td><td>0.361</td><td>0.643</td>
               <td>5.75</td><td class="best">0.89 s</td><td class="best">22.70</td>
             </tr>
           </tbody>
         </table>
       </div>
       <p class="table-note">VBench: subject, background, motion, dynamic, aesthetic, imaging. VideoAlign: visual quality, motion quality, text alignment, overall. LSE-C is SyncNet lip-sync confidence. TTFC and FPS measured on 10-second songs at 512×512 on a single NVIDIA A800. Best values in bold.</p>
+      <p class="table-note"><b>Reading this table.</b> We lead both baselines on visual quality (VQ) and motion quality (MQ), but trail on text alignment (TA). Because TA dominates the aggregate VideoAlign score, the Text-to-AV baseline ranks above us on Overall. Our system concentrates on close-up singing faces rather than the wider scenes the prompts describe — a consequence of the training distribution, not evidence of a general visual advantage.</p>
     </div>
   </section>
 
@@ -531,11 +546,11 @@
         </article>
         <article>
           <h3>Prompt dependence</h3>
-          <p>Training covers too few scenes and styles. Prompts near the training distribution work well; out-of-distribution prompts degrade, and text alignment trails the baselines.</p>
+          <p>Training covers too few scenes and styles, so the model relies heavily on the text prompt. Part of the text-alignment regression is attributable to this dependence rather than to the distillation itself.</p>
         </article>
         <article>
           <h3>Gap to SVS specialists</h3>
-          <p>On GMO-SVS the singing module trails the strongest dedicated system by a modest margin. Timbre specification was not a focus of the few-step distilled model.</p>
+          <p>On GMO-SVS a gap to the strongest dedicated SVS system remains on the singing metrics. Timbre specification was not a focus of the few-step distilled model.</p>
         </article>
       </div>
     </div>
@@ -551,8 +566,7 @@
     <details style="margin-top: 18px;">
       <summary style="cursor: pointer; color: var(--text-secondary); font-size: 13.5px;">Cite</summary>
       <div class="bibtex">@article{ltx25svs2026,
-  title   = {LTX2.5-SVS: Joint Singing-Voice and Video Generation from
-             Text and Music Conditions via Three-Stage Distillation},
+  title   = {LTX2.5-SVS: Toward Streaming Joint Singing and Video Generation},
   author  = {Anonymous},
   year    = {2026},
   note    = {Technical report, draft v0.1}
