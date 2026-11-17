@@ -206,10 +206,11 @@
   }
   .card img.poster { transition: opacity .25s ease; }
   .card video { opacity: 0; transition: opacity .25s ease; }
-  .card.is-playing img.poster { opacity: 0; }
+  .card.is-playing img.poster, .card.has-started img.poster { opacity: 0; }
   .card.is-playing video { opacity: 1; }
+  .card.has-started video { opacity: 1; }
   .card-meta {
-    position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 12px 9px;
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 12px 13px;
     color: #fff; font-size: 12px; font-weight: 600;
     background: linear-gradient(to top, rgb(0 0 0 / .62), transparent);
     display: flex; align-items: center; justify-content: space-between;
@@ -217,6 +218,22 @@
   }
   .card-meta .lang { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; opacity: .92; }
   .card-meta .dur { font-family: var(--mono); font-weight: 500; font-size: 11.5px; }
+  /* ---------- scrubber ---------- */
+  .scrub {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 16px;
+    opacity: 0; pointer-events: none;
+    cursor: pointer; touch-action: none;
+    transition: opacity .2s ease;
+  }
+  /* The poster covers the never-played video, so the bar only appears once in use. */
+  .card.has-started .scrub { opacity: 1; pointer-events: auto; }
+  .scrub-track, .scrub-fill {
+    position: absolute; left: 0; bottom: 0; height: 3px;
+    transition: height .15s ease;
+  }
+  .scrub-track { right: 0; background: rgb(255 255 255 / .34); }
+  .scrub-fill { width: 0; background: #fff; box-shadow: 0 0 4px rgb(0 0 0 / .35); }
+  .scrub:hover .scrub-track, .scrub:hover .scrub-fill { height: 5px; }
   .play-badge {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 46px; height: 46px; border-radius: 50%;
@@ -596,6 +613,12 @@
     return m > 0 ? m + ':' + String(r).padStart(2, '0') : total + ' s';
   }
 
+  function fmtClock(s) {
+    if (!isFinite(s) || s < 0) s = 0;
+    var total = Math.floor(s);
+    return Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
+  }
+
   function matches(e) {
     return (state.lang === 'all' || e.lang === state.lang) &&
            (state.group === 'all' || e.group === state.group);
@@ -616,15 +639,56 @@
       '<div class="card-meta">' +
         '<span class="lang">' + e.langLabel + '</span>' +
         '<span class="dur">' + fmtDuration(e.duration) + '</span>' +
+      '</div>' +
+      '<div class="scrub" aria-hidden="true">' +
+        '<div class="scrub-track"></div>' +
+        '<div class="scrub-fill"></div>' +
       '</div>';
 
     var video = el.querySelector('video');
+    var scrub = el.querySelector('.scrub');
+    var fill = el.querySelector('.scrub-fill');
+    var durEl = el.querySelector('.card-meta .dur');
+    var demoDur = fmtDuration(e.duration);
+
+    function updateScrub() {
+      var pct = video.duration ? (video.currentTime / video.duration) * 100 : 0;
+      fill.style.width = pct + '%';
+      // While a long clip is open, show elapsed time so the bar reads at a glance.
+      durEl.textContent = pct > 0 ? fmtClock(video.currentTime) + ' / ' + fmtClock(video.duration) : demoDur;
+    }
+    video.addEventListener('timeupdate', updateScrub);
+    video.addEventListener('loadedmetadata', updateScrub);
+    video.addEventListener('seeked', updateScrub);
+    function seekAt(clientX) {
+      var r = scrub.getBoundingClientRect();
+      var frac = Math.min(1, Math.max(0, (clientX - r.left) / r.width));
+      if (video.duration) { video.currentTime = frac * video.duration; updateScrub(); }
+    }
+    var dragging = false;
+    scrub.addEventListener('pointerdown', function (ev) {
+      ev.stopPropagation(); ev.preventDefault();
+      dragging = true; scrub.setPointerCapture(ev.pointerId); seekAt(ev.clientX);
+    });
+    scrub.addEventListener('pointermove', function (ev) {
+      if (!dragging) return;
+      ev.stopPropagation(); seekAt(ev.clientX);
+    });
+    scrub.addEventListener('pointerup', function (ev) {
+      if (!dragging) return;
+      dragging = false; ev.stopPropagation(); seekAt(ev.clientX);
+    });
+    scrub.addEventListener('pointercancel', function () { dragging = false; });
+    // Keep the card's click-to-toggle from firing when the user taps the bar.
+    scrub.addEventListener('click', function (ev) { ev.stopPropagation(); });
     // Only one clip plays at a time; audio is part of the result being shown.
     function play() {
       document.querySelectorAll('.card.is-playing').forEach(function (other) {
         if (other !== el) { other.querySelector('video').pause(); other.classList.remove('is-playing'); }
       });
-      if (!video.paused) { video.pause(); el.classList.remove('is-playing'); return; }
+      if (!video.paused && !video.ended) { video.pause(); el.classList.remove('is-playing'); return; }
+      // After the first play the poster is retired, so the paused frame stays visible.
+      el.classList.add('has-started');
       video.play().then(function () {
         el.classList.add('is-playing');
       }).catch(function () {
@@ -637,6 +701,7 @@
     el.addEventListener('keydown', function (ev) {
       if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); play(); }
     });
+    // A looping clip never fires "ended" before it wraps, so the badge stays hidden until paused.
     video.addEventListener('ended', function () { el.classList.remove('is-playing'); });
     return el;
   }
