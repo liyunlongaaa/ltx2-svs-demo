@@ -75,7 +75,7 @@ browsers but not all). The page falls back to a muted preview if the browser's
 autoplay policy blocks audio.
 
 Each card has a scrub bar along the bottom edge, visible once the clip has been
-started; click or drag it to seek, or focus it and use the arrow keys. Note that
+started; click or drag it to seek. Note that
 Python's `http.server` does **not** answer HTTP Range requests, so seeking in a
 large minute-long clip can feel sluggish locally. GitHub Pages supports Range
 requests, so the deployed site seeks fine. To reproduce that locally, serve the

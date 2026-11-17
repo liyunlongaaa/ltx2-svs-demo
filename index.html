@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LTX2.5-SVS — Toward Streaming Joint Singing and Video Generation</title>
-<meta name="description" content="LTX2.5-SVS: toward streaming joint singing and video generation — 0.89 s time-to-first-chunk at 22.7 FPS on a single A800.">
+<meta name="description" content="LTX2.5-SVS: toward streaming joint singing and video generation — 0.87 s generator-only time-to-first-chunk and 8.95 s end-to-end for a 5 s clip on a single A800.">
 <meta property="og:title" content="LTX2.5-SVS — Toward Streaming Joint Singing and Video Generation">
 <meta property="og:description" content="To our knowledge, the first system that jointly generates singing voice and video, and does so as a streaming generator with block-causal inference.">
 <meta property="og:image" content="assets/posters/en-5s-01.jpg">
@@ -264,6 +264,13 @@
   tbody tr.ours td:first-child { background: var(--accent-soft); }
   thead th.ours-col { color: var(--accent-strong); }
   .best { font-weight: 700; }
+  /* Fifteen columns: tighten cells so the efficiency block fits without scrolling on desktop. */
+  table.compact { font-size: 12.5px; }
+  table.compact thead th { padding: 12px 5px; font-size: 10.5px; letter-spacing: 0; }
+  table.compact tbody td { padding: 10px 5px; }
+  table.compact tbody td:first-child, table.compact thead th:first-child { padding-left: 12px; }
+  table.compact thead tr:first-child th { font-size: 12px; }
+  @media (min-width: 1160px) { table.compact { font-size: 13px; } }
   .table-note { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
   .table-title { font-size: 14.5px; font-weight: 650; margin: 32px 0 10px; }
 
@@ -324,19 +331,19 @@
 
     <div class="kpis">
       <div class="kpi">
-        <div class="kpi-label">Time to first chunk</div>
-        <div class="kpi-value">0.89<small>s</small></div>
-        <div class="kpi-note"><span class="vs">vs 105 s</span> · 118× sooner than the dense baseline</div>
+        <div class="kpi-label">Generator time to first chunk</div>
+        <div class="kpi-value">0.87<small>s</small></div>
+        <div class="kpi-note"><span class="vs">vs 110.1 s</span> denoising for the dense baseline</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Streaming throughput</div>
-        <div class="kpi-value">22.7<small>FPS</small></div>
-        <div class="kpi-note"><span class="vs">vs 1.96 FPS</span> · 11.6× faster, single A800</div>
+        <div class="kpi-label">End-to-end first chunk</div>
+        <div class="kpi-value">2.16<small>s</small></div>
+        <div class="kpi-note"><span class="vs">70× sooner</span> than the dense baseline (151.6 s)</div>
       </div>
       <div class="kpi">
-        <div class="kpi-label">Training horizon → rollout</div>
-        <div class="kpi-value">5<small>s</small> → 60<small>s+</small></div>
-        <div class="kpi-note">Minute-level audio-video from 5 s clips</div>
+        <div class="kpi-label">5 s clip, end to end</div>
+        <div class="kpi-value">8.95<small>s</small></div>
+        <div class="kpi-note"><span class="vs">16.9× faster</span> than the dense baseline (151.6 s)</div>
       </div>
     </div>
   </div>
@@ -361,16 +368,16 @@
       </p>
       <p class="abstract">
         We evaluate the generated singing voice and video separately. On the GMO-SVS test set, our singing module approaches
-        specialist-level performance. For audio-video generation, we compare against the released LTX-2.5 inference stacks our
-        system starts from: an audio-driven pipeline that receives the singing track as input, and a Text-to-AV pipeline with no
-        singing signal. Our model attains visual and motion quality superior to both baselines, and its lip-sync confidence
-        approaches the audio-driven baseline. The Text-to-AV baseline scores higher on text alignment, and because that dimension
-        dominates the aggregate VideoAlign score it ranks above ours there — a consequence of our model specializing in close-up
-        singing portraits rather than the wider scenes the prompt describes.
+        specialist-level performance. For audio-video generation, we compare against two released LTX-2.5 baselines on a shared
+        internal prompt set using VBench, VideoAlign, and SyncNet. Our model attains superior visual and motion quality, leads
+        on imaging quality and dynamic degree, and its lip-sync confidence (LSE-C = 5.75) closely approaches the audio-driven
+        baseline (5.85) while both far exceed the text-to-AV baseline (2.91). The text-to-AV baseline leads on text alignment
+        (1.423 vs. 0.361); that gap reflects our specialization in close-up singing portraits rather than the wider scenes the
+        prompt describes.
       </p>
       <p class="abstract">
-        Inference is measurably streaming on a single NVIDIA A800 80&nbsp;GB: the first ≈1&nbsp;s chunk completes in 0.89&nbsp;s
-        (the dense baseline produces no output until fully denoised, 105&nbsp;s), at 22.7&nbsp;FPS — an 11.6× throughput advantage.
+        On a single A800 in bf16, the generator produces its first ≈1&nbsp;s chunk in 0.87&nbsp;s at 512×512, and full
+        end-to-end inference for a 5&nbsp;s clip takes 8.95&nbsp;s versus 151.6&nbsp;s for the dense baseline (16.9×).
       </p>
       <div class="contrib">
         <article>
@@ -385,8 +392,8 @@
         </article>
         <article>
           <div class="num">3</div>
-          <h3>Streaming at 22.7 FPS</h3>
-          <p>0.89 s time-to-first-chunk and 22.7 FPS on a single NVIDIA A800 — an 11.6× throughput advantage over the dense baseline, with competitive singing quality.</p>
+          <h3>Streaming in 0.87 s</h3>
+          <p>Generator-only first-chunk latency of 0.87 s, and 8.95 s end-to-end for a 5 s clip versus 151.6 s for the dense baseline — 16.9× faster, with competitive singing quality.</p>
         </article>
       </div>
     </div>
@@ -429,14 +436,14 @@
 
       <figure style="margin-top: 34px;">
         <div class="fig-frame">
-          <img src="assets/figures/error_recycling.png" width="2160" height="1305" loading="lazy"
+          <img src="assets/figures/error_recycling.png" width="2160" height="1215" loading="lazy"
                alt="Comparison of training paradigms: the Forcing series, SVI/LongLive, Omni Forcing, and the dual-stream recycling used in this work.">
         </div>
         <figcaption>
           <b>Training paradigms for autoregressive audio-video generation.</b> The video-only Forcing series regresses on
-          synthesized ODE trajectories; SVI / LongLive recycle prediction errors over long-horizon video rollout; Omni
-          Forcing applies the ODE-trajectory recipe to audio and video; our pipeline recycles prediction errors on video and
-          audio jointly, using raw audio-video pairs directly and requiring no ODE synthesis.
+          synthesized ODE trajectories; SVI / LongLive recycle prediction errors and reuse them in training to acquire
+          long-horizon video rollout ability; Omni Forcing applies the ODE-trajectory recipe to audio and video; our pipeline
+          recycles prediction errors on video and audio jointly, using raw audio-video pairs directly and requiring no ODE synthesis.
         </figcaption>
       </figure>
     </div>
@@ -507,20 +514,20 @@
 
       <h3 class="table-title">Audio-visual generation · shared internal prompt set</h3>
       <div class="table-scroll">
-        <table>
+        <table class="compact">
           <thead>
             <tr>
               <th rowspan="2">System</th>
               <th colspan="6">VBench</th>
               <th colspan="4">VideoAlign</th>
               <th>SyncNet</th>
-              <th colspan="2">Efficiency</th>
+              <th colspan="3">Efficiency</th>
             </tr>
             <tr>
               <th>Subject ↑</th><th>Background ↑</th><th>Motion ↑</th><th>Dynamic ↑</th><th>Aesthetic ↑</th><th>Imaging ↑</th>
               <th>VQ ↑</th><th>MQ ↑</th><th>TA ↑</th><th>Overall ↑</th>
               <th>LSE-C ↑</th>
-              <th>TTFC</th><th>FPS ↑</th>
+              <th>TTFC<sub>gen</sub> ↓</th><th>TTFC ↓</th><th>Runtime ↓</th>
             </tr>
           </thead>
           <tbody>
@@ -528,25 +535,26 @@
               <td>Audio-driven baseline</td><td>0.927</td><td>0.942</td><td>0.993</td><td>0.690</td>
               <td class="best">0.592</td><td>61.54</td>
               <td>−0.375</td><td>−0.256</td><td>1.247</td><td>0.616</td>
-              <td class="best">5.85</td><td>—</td><td>—</td>
+              <td class="best">5.85</td><td>—</td><td>—</td><td>—</td>
             </tr>
             <tr>
               <td>Text-to-AV baseline</td><td class="best">0.957</td><td class="best">0.956</td><td class="best">0.994</td><td>0.644</td>
               <td>0.586</td><td>65.55</td>
               <td>0.027</td><td>−0.127</td><td class="best">1.423</td><td class="best">1.323</td>
-              <td>2.91</td><td>105 s</td><td>1.96</td>
+              <td>2.91</td><td>110.1 s</td><td>151.6 s</td><td>151.6 s</td>
             </tr>
             <tr class="ours">
               <td>Ours</td><td>0.898</td><td>0.923</td><td>0.993</td><td class="best">0.900</td>
               <td>0.545</td><td class="best">65.65</td>
               <td class="best">0.235</td><td class="best">0.047</td><td>0.361</td><td>0.643</td>
-              <td>5.75</td><td class="best">0.89 s</td><td class="best">22.70</td>
+              <td>5.75</td><td class="best">0.87 s</td><td class="best">2.16 s</td><td class="best">8.95 s</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p class="table-note">VBench: subject, background, motion, dynamic, aesthetic, imaging. VideoAlign: visual quality, motion quality, text alignment, overall. LSE-C is SyncNet lip-sync confidence. TTFC and FPS measured on 10-second songs at 512×512 on a single NVIDIA A800. Best values in bold.</p>
-      <p class="table-note"><b>Reading this table.</b> We lead both baselines on visual quality (VQ) and motion quality (MQ), but trail on text alignment (TA). Because TA dominates the aggregate VideoAlign score, the Text-to-AV baseline ranks above us on Overall. Our system concentrates on close-up singing faces rather than the wider scenes the prompts describe — a consequence of the training distribution, not evidence of a general visual advantage.</p>
+      <p class="table-note">VBench: subject, background, motion, dynamic, aesthetic, imaging. VideoAlign: visual quality, motion quality, text alignment, overall. LSE-C is SyncNet lip-sync confidence. Efficiency measured in bf16 on 5-second songs at 512×512 on a single NVIDIA A800: TTFC<sub>gen</sub> is generator-only first-chunk latency, TTFC is end-to-end from prompt text to the first decoded pixels and waveform, and Runtime covers the full clip. The dense baseline has no streaming output, so its TTFC and Runtime both equal the full-clip cost. Best values in bold.</p>
+      <p class="table-note"><b>Reading this table.</b> We lead on visual quality (VQ), motion quality (MQ), dynamic degree, and imaging quality; motion smoothness is essentially tied. We trail on subject/background consistency, aesthetic quality, and text alignment (TA). Because TA dominates the aggregate VideoAlign score, the Text-to-AV baseline ranks above us on Overall — a consequence of close-up-portrait training data, which VideoAlign also favors on VQ/MQ, not evidence of a general visual advantage.</p>
+      <p class="table-note"><b>On the two latency ratios.</b> 151.6 s / 2.16 s ≈ 70× measures the architectural ability to emit a chunk early; 151.6 s / 8.95 s ≈ 16.9× measures the speed difference in producing the full video. The generator-only 0.87 s is the number to read when the text prompt is fixed (encoding cached) and VAE decoding is parallelized.</p>
     </div>
   </section>
 
